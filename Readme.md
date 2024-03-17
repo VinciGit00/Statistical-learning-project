@@ -12,4 +12,4 @@ Official repository for the Statistical Learning course for the Master's degree 
 - [x] 4 - Forward stepwise with polynomial regression
 - [x] 5 - Backward stepwise with polynomial regression
 - [x] 6 - Lasso regression with CV for choosing the best lambda
-- [ ] 7 - Ridge regression with CV for choosing the best lambda
+- [x] 7 - Ridge regression with CV for choosing the best lambda
