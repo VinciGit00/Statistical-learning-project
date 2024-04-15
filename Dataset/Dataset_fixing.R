@@ -4,7 +4,7 @@ df <- read.csv("Sleep_health_and_lifestyle_dataset.csv")
 
 
 correlation<- cor(model.matrix(~.-1,data=df));
-## High correlation: Stess level (-0.81)
+## High correlation: test level (-0.81)
 
 correlation_high <- correlation[correlation[, "Sleep.Duration"] > 0.8 | correlation[, "Sleep.Duration"] < -0.8, ];
 correlation_high <- correlation_high[ "Sleep.Duration"];
