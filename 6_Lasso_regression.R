@@ -1,4 +1,5 @@
 library(caret)
+library(glmnet)
 
 setwd("~/Github/Statistical-learning-project/Dataset")
 
@@ -35,4 +36,16 @@ df <- df[, !(names(df) %in% c("Gender", "Occupation", "BMI.Category", "Blood.Pre
 # Sleep.DisorderInsomnia
 
 df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure115/78`, BMI.CategoryObese, Sleep.DisorderInsomnia))
+
+# Lasso regression
+# Define control parameters for Lasso regression
+ctrl <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
+
+# Lasso regression
+# Train Lasso regression model with different lambda values
+response_variable <- df$Sleep.Duration
+lasso_model <- train(x = df[, -which(names(df) == "Sleep.Duration")], y = response_variable, method = "glmnet", trControl = ctrl, tuneLength = 10, preProcess = c("center", "scale"))
+
+# Display the best lambda value selected by caret
+print(lasso_model$bestTune)
 
