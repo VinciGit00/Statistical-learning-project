@@ -1,4 +1,5 @@
 setwd("~/Github/Statistical-learning-project/Dataset")
+df <- read.csv("C:/Statistical-learning-project/Dataset/Sleep_health_and_lifestyle_dataset.csv")
 
 df <- read.csv("Sleep_health_and_lifestyle_dataset.csv")
 
