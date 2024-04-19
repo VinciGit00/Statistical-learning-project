@@ -14,10 +14,9 @@ All the algorithms are implemented in R
 - [ ] 5 - Backward stepwise with polynomial/linear regression
 - [x] 6 - Lasso regression with CV for choosing the best lambda
 - [x] 7 - Ridge regression with CV for choosing the best lambda
-- [ ] 8 - Smoothing splines (iterative approach) 
-- [ ] 9 - GAM with smoothing splines
-- [ ] 10 - GAM with local regression
-- [ ] 11 - Regression tree 
-- [ ] 12 - Random forests
-- [ ] 13 - Boosting
-- [ ] 14 - Bagging
+- [x] 8 - GAM with smoothing splines
+- [ ] 9 - GAM with local regression
+- [ ] 10 - Regression tree 
+- [ ] 11 - Random forest
+- [ ] 12 - Boosting (optional)
+- [ ] 13 - Bagging (optional)
