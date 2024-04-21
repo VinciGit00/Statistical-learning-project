@@ -1,0 +1,19 @@
+
+######### 1 #########
+- cosa fare quando ho intervallo di confidenza dei coefficienti che comprende lo zero, solitamente i regressori che lo
+	comprendono escono anche che non sono significativi?   -> TOGLIERE QUESTI REGRESSORI NEL MODELLO SELECTED
+- come spieghiamo il fatto che i residui non siamo distribuiti normalmente ?
+- nei residui sembrano essere presenti dei pattern, questo significa che il modello lineare non spiega tutto quello che serve.
+- quando facciamo regressione polinomiale, oltre ad elevare a potenza, vogliamo anche provare a calcolare delle interazioni tra regressori, 
+	usare il log() di qualche regressore ?
+- quando si fa KFOLD e LOOCV, oltre a calcolare MSE averrage, devo controllare i residui in ciascuna iterazione ?
+
+- IMPORTANTE: con loocv e kfold, quando provo con gradi diversi dei polinomi ho problemi e si diverge, credo sia perchè ci sono dei valori che
+	capitano nel test ma non sono mai stati visti nel train, e con il polinomio la differenza tra previsione e reale esplode.
+
+- TODO: usare bootstrap per calcolare degli intervalli di confidenza sulle previsioni 
+
+- TODO: capire comem stampare gli intervalli di confidenza delle previsioni
+
+- TODO: possiamo magari provare a fare diversi modelli, tenendo solo i regressori più significativi e calcolarne l'AIC per capire quale può
+	essere più buono ed allo stesso tempo più semplice? ha senso usare AIC come altre metrica oltre a MSE per modelli diversi ? -> NO
