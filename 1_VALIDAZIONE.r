@@ -5,6 +5,8 @@ library(caret)
 require(dplyr)
 library(foreach)
 library(gam)
+install.packages('gplots')
+library(gplots)
 library(akima)
 library(MASS)
 set.seed(22);
@@ -55,7 +57,8 @@ plot(predict(lm_fit), rstudent(lm_fit))
 
 ##### CALCOLO MSE #####
 pred_value <- predict(lm_fit,newdata = df[-train,], interval = "confidence")
-plot(df$Sleep.Duration[-train],pred_value) # confronto i valori previsti con quelli di test
+plot(df$Sleep.Duration[-train],pred_value[,1]) # confronto i valori previsti con quelli di test
+#plotCI(df$Sleep.Duration[-train], pred_value[,1], pred_value[,3], li=pred_value[2])
 MSE <- mean(lm_fit$residuals^2)
 
 
