@@ -1,4 +1,6 @@
 library(caret)
+library(glmnet)
+library(dplyr)
 
 set.seed(22)
 
@@ -85,4 +87,22 @@ if (length(variables_removed) > 0) {
   print(variables_removed)
 } else {
   cat("No variables were removed from the model.\n")
+}
+
+# Calcolo dei residui del modello
+residui <- test_data$Sleep.Duration - predictions
+
+# Test di normalità dei residui
+shapiro_test <- shapiro.test(residui)
+print("Shapiro-Wilk test per la normalità dei residui:")
+print(shapiro_test)
+
+# Disegna l'istogramma dei residui
+hist(residui, main = "Istogramma dei Residui", xlab = "Residui")
+
+# Stampa un messaggio se i residui non sono normalmente distribuiti
+if (shapiro_test$p.value < 0.05) {
+  cat("I residui non seguono una distribuzione normale (p-value < 0.05).\n")
+} else {
+  cat("I residui seguono una distribuzione normale (p-value >= 0.05).\n")
 }

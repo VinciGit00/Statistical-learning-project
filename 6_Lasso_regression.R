@@ -97,3 +97,21 @@ if (length(variables_removed) > 0) {
 } else {
   cat("Non sono state rimosse variabili dal modello.\n")
 }
+
+# Calcolo dei residui del modello
+residui <- actual_values - predictions
+
+# Test di normalità dei residui
+shapiro_test <- shapiro.test(residui)
+print("Shapiro-Wilk test per la normalità dei residui:")
+print(shapiro_test)
+
+# Disegna l'istogramma dei residui
+hist(residui, main = "Istogramma dei Residui", xlab = "Residui")
+
+# Stampa un messaggio se i residui non sono normalmente distribuiti
+if (shapiro_test$p.value < 0.05) {
+  cat("I residui non seguono una distribuzione normale (p-value < 0.05).\n")
+} else {
+  cat("I residui seguono una distribuzione normale (p-value >= 0.05).\n")
+}
