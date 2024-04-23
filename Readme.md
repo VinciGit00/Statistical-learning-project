@@ -7,15 +7,15 @@ All the algorithms are implemented in R
 
 ## List of all the course algorithms:
 
-- [ ] 1 - Leave-one-out validation with polynomial/linear regression
-- [ ] 2 - Cross-validation with polynomial/linear regression
+- [x] 1 - Leave-one-out validation with polynomial/linear regression
+- [x] 2 - Cross-validation (kfold) with polynomial/linear regression
 - [ ] 3 - Bootstrap with polynomial/linear regression
 - [ ] 4 - Forward stepwise with polynomial/linear regression
 - [ ] 5 - Backward stepwise with polynomial/linear regression
 - [x] 6 - Lasso regression with CV for choosing the best lambda
 - [x] 7 - Ridge regression with CV for choosing the best lambda
 - [x] 8 - GAM with smoothing splines
-- [ ] 9 - GAM with local regression
+- [x] 9 - GAM with local regression
 - [ ] 10 - Regression tree 
 - [ ] 11 - Random forest
 - [ ] 12 - Boosting (optional)

@@ -1,5 +1,8 @@
 library(caret)
 library(glmnet)
+library(dplyr)
+
+set.seed(22)
 
 setwd("~/Github/Statistical-learning-project/Dataset")
 
@@ -37,6 +40,11 @@ df <- df[, !(names(df) %in% c("Gender", "Occupation", "BMI.Category", "Blood.Pre
 
 df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure115/78`, BMI.CategoryObese, Sleep.DisorderInsomnia))
 
+df <- df %>% mutate_all(~(scale(.) %>% as.vector))
+train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
+
+df <- df[train_lines, ]
+
 # Lasso regression
 # Define control parameters for Lasso regression
 ctrl <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
@@ -49,3 +57,43 @@ lasso_model <- train(x = df[, -which(names(df) == "Sleep.Duration")], y = respon
 # Display the best lambda value selected by caret
 print(lasso_model$bestTune)
 
+# Calcolo del MSE del modello migliore
+test_data <- df[-train_lines, ]  # Utilizziamo i dati non usati per il training come dati di test
+predictions <- predict(lasso_model, newdata = test_data)
+actual_values <- test_data$Sleep.Duration
+mse <- mean((predictions - actual_values)^2)
+print(paste("Mean Squared Error (MSE) del modello migliore:", mse))
+
+# Ottieni i coefficienti del modello
+coefficients <- coef(lasso_model$finalModel, s = lasso_model$bestTune$lambda)
+
+# Stampa i coefficienti delle variabili e indica se sono significativi
+significant_coeffs <- coefficients[c(coefficients[,1] != 0),]
+print(significant_coeffs)
+
+# Numero totale di variabili nel dataset
+num_variables_total <- ncol(df) - 1  # Escludiamo la variabile di risposta
+
+# Numero di variabili significative nel modello
+num_variables_significant <- length(significant_coeffs)
+
+if (num_variables_significant < num_variables_total) {
+  cat("Sono state rimosse", num_variables_total - num_variables_significant, "variabili dal modello.\n")
+} else if (num_variables_significant == num_variables_total) {
+  cat("Non è stata rimossa nessuna variabile dal modello.\n")
+} else {
+  cat("Non ci sono abbastanza informazioni per determinare se sono state rimosse variabili.\n")
+}
+
+# Elenco delle variabili originali
+original_variables <- c("GenderMale", "OccupationDoctor", "Blood.Pressure115/78", "BMI.CategoryObese", "Sleep.DisorderInsomnia")
+
+# Trova le variabili rimosse
+variables_removed <- setdiff(original_variables, rownames(significant_coeffs))
+
+if (length(variables_removed) > 0) {
+  cat("Le seguenti variabili sono state rimosse dal modello:\n")
+  print(variables_removed)
+} else {
+  cat("Non sono state rimosse variabili dal modello.\n")
+}

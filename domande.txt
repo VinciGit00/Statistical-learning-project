@@ -13,7 +13,7 @@
 
 - TODO: usare bootstrap per calcolare degli intervalli di confidenza sulle previsioni 
 
-- TODO: capire comem stampare gli intervalli di confidenza delle previsioni
+- TODO: capire come stampare gli intervalli di confidenza delle previsioni
 
 - TODO: possiamo magari provare a fare diversi modelli, tenendo solo i regressori più significativi e calcolarne l'AIC per capire quale può
 	essere più buono ed allo stesso tempo più semplice? ha senso usare AIC come altre metrica oltre a MSE per modelli diversi ? -> NO
