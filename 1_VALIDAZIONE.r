@@ -5,7 +5,7 @@ library(caret)
 require(dplyr)
 library(foreach)
 library(gam)
-install.packages('gplots')
+#install.packages('gplots')
 library(gplots)
 library(akima)
 library(MASS)
@@ -33,12 +33,11 @@ colnames(df)[which(names(df) == "BMI.CategoryNormal Weight")] <- "BMI.CategoryNo
 colnames(df)[which(names(df) == "OccupationSoftware Engineer")] <- "OccupationSoftware.Engineer"
 colnames(df)[which(names(df) == "Sleep.DisorderSleep Apnea")] <- "Sleep.DisorderSleep.Apnea"
 
-View(df)
+#View(df)
 
 
 ##### SUDDIVIDO IN TEST E TRAIN (70-30) #####
 train <- sample(dim(df)[1], round(dim(df)[1]*0.7))
-
 
 ##### LINEAR MULTIPLE REGRESSION ##### 
 lm_fit <- lm(Sleep.Duration ~ ., data = df[train,])
@@ -59,7 +58,8 @@ plot(predict(lm_fit), rstudent(lm_fit))
 pred_value <- predict(lm_fit,newdata = df[-train,], interval = "confidence")
 plot(df$Sleep.Duration[-train],pred_value[,1]) # confronto i valori previsti con quelli di test
 #plotCI(df$Sleep.Duration[-train], pred_value[,1], pred_value[,3], li=pred_value[2])
-MSE <- mean(lm_fit$residuals^2)
+MSE_TRAIN <- mean(lm_fit$residuals^2) 
+MSE_TEST <- mean((df$Sleep.Duration[-train]-pred_value)^2)  
 
 
 ##### LEVERAGE PLOT #####
@@ -87,7 +87,7 @@ column_names <- colnames(df)
 use <- column_names[c(1,3,4,5,6)] 
 dontuse <- column_names[-c(1,2,3,4,5,6)] 
 
-# Smoothing splines
+
 b <-   paste0("Sleep.Duration ~ ", paste0("poly(",use,", 2, raw=TRUE)", collapse= "+"),"+", paste0(dontuse,collapse="+"),collapse="")
 
 lm_fit_2 <- lm ( Sleep.Duration ~ poly(Age, 2, raw=TRUE)+poly(Physical.Activity.Level, 2, raw=TRUE)+poly(Stress.Level, 2, raw=TRUE)+poly(Heart.Rate, 2, raw=TRUE)+poly(Daily.Steps, 2, raw=TRUE)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationManager+OccupationNurse+OccupationSales.Representative+OccupationSalesperson+OccupationScientist+OccupationSoftware.Engineer+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure11776+Blood.Pressure11875+Blood.Pressure11876+Blood.Pressure11977+Blood.Pressure12080+Blood.Pressure12179+Blood.Pressure12280+Blood.Pressure12580+Blood.Pressure12582+Blood.Pressure12683+Blood.Pressure12884+Blood.Pressure12885+Blood.Pressure12984+Blood.Pressure13085+Blood.Pressure13086+Blood.Pressure13186+Blood.Pressure13287+Blood.Pressure13588+Blood.Pressure13590+Blood.Pressure13991+Blood.Pressure14090+Blood.Pressure14095+Blood.Pressure14292+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data=df[train,])
@@ -104,7 +104,7 @@ test_5 = mean(( df[train,]$Sleep.Duration - predict (lm_fit_5,df[train,])) [-tra
 
 
 par(mfrow = c(1, 1))
-plot(1:5,c(MSE,test_2,test_3,test_4,test_5), type = "b", col="blue",
+plot(1:5,c(MSE_TEST,test_2,test_3,test_4,test_5), type = "b", col="blue",
      ylab = "Test MSE",
      xlab = "Flexibility",
      main = "Validation Test MSE")

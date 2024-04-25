@@ -6,3 +6,4 @@
 - At the end of each process there should be present the parameter significance test
 - Not significative parameters should be removed
 
+
