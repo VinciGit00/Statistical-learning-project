@@ -8,7 +8,11 @@ All the algorithms are implemented in R
 ## List of all the course algorithms:
 
 - [x] 1 - Leave-one-out validation with polynomial/linear regression
+<<<<<<< HEAD
 - [x] 2 - Cross-validation with polynomial/linear regression
+=======
+- [x] 2 - Cross-validation (kfold) with polynomial/linear regression
+>>>>>>> ebb67fe9278d80b952c8117cb971c257b5a43be0
 - [ ] 3 - Bootstrap with polynomial/linear regression
 - [x] 4 - Forward stepwise with polynomial/linear regression
 - [x] 5 - Backward stepwise with polynomial/linear regression
