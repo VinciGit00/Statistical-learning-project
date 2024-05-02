@@ -9,6 +9,8 @@ library(gam)
 library(gplots)
 library(akima)
 library(MASS)
+#install.packages('tseries')
+library(tseries)
 set.seed(22);
 
 ##### DATASET SETUP ######
@@ -33,7 +35,11 @@ colnames(df)[which(names(df) == "BMI.CategoryNormal Weight")] <- "BMI.CategoryNo
 colnames(df)[which(names(df) == "OccupationSoftware Engineer")] <- "OccupationSoftware.Engineer"
 colnames(df)[which(names(df) == "Sleep.DisorderSleep Apnea")] <- "Sleep.DisorderSleep.Apnea"
 
-#View(df)
+#############################
+# Tolgo colonne pressione con pochi sample
+df <- subset(df, select = -c(`Blood.Pressure11776`, `Blood.Pressure11875`, `Blood.Pressure11876`, `Blood.Pressure11977`, `Blood.Pressure12179`, `Blood.Pressure12280`, `Blood.Pressure12582`, `Blood.Pressure12683`, `Blood.Pressure12884`, `Blood.Pressure12885`, `Blood.Pressure12984`, `Blood.Pressure13086`, `Blood.Pressure13186`, `Blood.Pressure13287`, `Blood.Pressure13588`, `Blood.Pressure13991`,  `Blood.Pressure14090`, `Blood.Pressure14292`))
+df <- subset(df, select = -c(`OccupationManager`, `OccupationSales.Representative`, `OccupationScientist`, `OccupationSoftware.Engineer`))
+#############################
 
 
 ##### SUDDIVIDO IN TEST E TRAIN (70-30) #####
@@ -72,14 +78,20 @@ plot(hatvalues(lm_fit), col="blue",
 
 ###### ANALISI RESIDUI ######
 res_mean <- mean(lm_fit$residuals)
-hist(lm_fit$residuals,40,
+res_var <- var(lm_fit$residuals)
+hist(lm_fit$residuals,50,
      xlab = "Residual",
-     main = "Empirical residual distribution") 
+     main = "Residual distribution") 
 plot(lm_fit$residuals, pch = "o", col = "blue" ,
      ylab = "Residual", main = paste0("Residual plot - mean:",round(mean(lm_fit$residuals),digits = 4),
                                       "- var:", round(var(lm_fit$residuals),digits = 2)))
+qqnorm(lm_fit$residuals, pch = 1, frame = FALSE)
+qqline(lm_fit$residuals, col = "steelblue", lwd = 2)
+
 abline(c(0,0),c(0,length(lm_fit$residuals)), col= "red", lwd = 2)
-ks.test(lm_fit$residuals, 'pnorm') # test normalità kolgomorov-smirnov (se pvalue > 0.05 allora dati sono normali)
+# test di normalità (if pvalue > 0.05 residuals have normal distribution)
+shapiro.test(lm_fit$residuals)
+ks.test(lm_fit$residuals, 'pnorm')
 
 
 ###### POLYNOMIAL (applico polinomio a tutti i regressori continui) #######
