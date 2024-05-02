@@ -1,56 +1,86 @@
 library(caret)
-library(tree)
 library(glmnet)
 library(dplyr)
+library(tree)
+library ( ISLR2 )
 
 set.seed(22)
 
-# Caricamento dei dati
-df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted.csv")
+setwd("~/Github/Statistical-learning-project/Dataset")
 
-# Trasformazione delle variabili categoriche in dummy variables
+df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
+df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+# Types of the columns of the dataset:
+# Gender: character
+# Age:integer
+# Occupation: character
+# Sleep.Duration: numeric
+# Physical.Activity.Level:integer
+# Stress.Level: integer
+# BMI.Category: character
+# Blood.Pressure: character 
+# Heart.Rate: integer
+# Daily.Steps: integer
+# Sleep.Disorder: character
+
+# Transformation to dummy variables
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
+
 df_dummies <- predict(dummy_transform, newdata = df)
+
 df <- cbind(df, df_dummies)
+
 df <- df[, !(names(df) %in% c("Gender", "Occupation", "BMI.Category", "Blood.Pressure", "Sleep.Disorder"))]
 
-## Rimozione di una variabile per ogni dummy
-# Variabili rimosse: GenderMale, OccupationDoctor, Blood.Pressure115/78, BMI.CategoryObese, Sleep.DisorderInsomnia
-df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure115/78`, BMI.CategoryObese, Sleep.DisorderInsomnia))
+## Removing one element for each dummy
+# They were removed:
+# GenderMale
+# OccupationDoctor
+# Blood.Pressure115/78
+# BMI.CategoryObese
+# Sleep.DisorderInsomnia
 
-# Standardizzazione delle variabili predittive
+df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure11578`, BMI.CategoryObese, Sleep.DisorderInsomnia))
+
 df <- df %>% mutate_all(~(scale(.) %>% as.vector))
+train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
 
+names(df)[names(df) == 'OccupationSales Representative'] <- 'OccupationSalesRepresentative'
+names(df)[names(df) == 'OccupationSoftware Engineer'] <- 'OccupationSoftwareEngineer'
+names(df)[names(df) == 'BMI.CategoryNormal Weight'] <- 'BMI.CategoryNormalWeight'
+names(df)[names(df) == 'Sleep.DisorderSleep Apnea'] <- 'Sleep.DisorderSleepApnea'
 # Divisione dei dati in set di addestramento e test
 train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
 train_df <- df[train_lines, ]
 test_df <- df[-train_lines, ]
 
-# Creazione del controllo di addestramento per la cross-validazione
-ctrl <- trainControl(method = "cv", number = 10)
+# Tree method
 
-# Addestramento del modello
-tree_model <- train(
-  Sleep.Duration ~ . - Age,
-  method = "tree",
-  data = train_df,
-  trControl = ctrl
-)
+# train model
+tree_model <- tree( Sleep.Duration ~ . ,data= train_df, split = "gini")
 
-# Stampa delle informazioni sul modello
-print(tree_model)
+# show result 
+summary(tree_model)
+plot(tree_model)
+text(tree_model,pretty = 0)
 
-# Valutazione delle prestazioni del modello sui dati di addestramento
-predictions_train <- predict(tree_model, newdata = train_df)
-confusionMatrix(predictions_train, train_df$Sleep.Duration)
+pred_value <- predict(tree_model, newdata = test_df)
+table(pred_value, test_df$Sleep.Duration)
 
-# Valutazione delle prestazioni del modello sui dati di test
-predictions_test <- predict(tree_model, newdata = test_df)
-confusionMatrix(predictions_test, test_df$Sleep.Duration)
+res <- pred_value - test_df$Sleep.Duration
+mean_res <- mean(res)
+mse <- mean((res)^2) 
 
-# Cross-validation per la selezione dei migliori parametri
-print(tree_model)
+shapiro_test <- shapiro.test(res)
+print("Shapiro-Wilk test per la normalità dei residui:")
+print(shapiro_test)
 
-# Potatura dell'albero (esempio con un'altezza massima di 5)
-pruned_tree <- prune.tree(tree_model$finalModel, best = 5)
-print(pruned_tree)
+# Disegna l'istogramma dei residui
+hist(res, main = "Istogramma dei Residui", xlab = "Residui")
+
+# Stampa un messaggio se i residui non sono normalmente distribuiti
+if (shapiro_test$p.value < 0.05) {
+  cat("I residui non seguono una distribuzione normale (p-value < 0.05).\n")
+} else {
+  cat("I residui seguono una distribuzione normale (p-value >= 0.05).\n")
+}
