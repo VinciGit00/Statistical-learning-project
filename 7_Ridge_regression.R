@@ -4,42 +4,48 @@ library(dplyr)
 
 set.seed(22)
 
+
+##### DATASET SETUP ######
 setwd("~/Github/Statistical-learning-project/Dataset")
 
-df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted.csv")
+df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-# Transformation to dummy variables
+df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
+
 df_dummies <- predict(dummy_transform, newdata = df)
+
 df <- cbind(df, df_dummies)
+
 df <- df[, !(names(df) %in% c("Gender", "Occupation", "BMI.Category", "Blood.Pressure", "Sleep.Disorder"))]
 
-## Removing one element for each dummy
-# They were removed:
-# GenderMale
-# OccupationDoctor
-# Blood.Pressure115/78
-# BMI.CategoryObese
-# Sleep.DisorderInsomnia
+df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure11578`, BMI.CategoryObese, Sleep.DisorderInsomnia))
 
-df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure115/78`, BMI.CategoryObese, Sleep.DisorderInsomnia))
+df <- df %>% mutate_all(~(scale(.) %>% as.vector)) # standardizzo
 
-# Standardize predictors
-preproc_values <- preProcess(df[, -which(names(df) == "Sleep.Duration")], method = c("center", "scale"))
-df[, -which(names(df) == "Sleep.Duration")] <- predict(preproc_values, newdata = df[, -which(names(df) == "Sleep.Duration")])
+colnames(df)[which(names(df) == "OccupationSales Representative")] <- "OccupationSales.Representative"
+colnames(df)[which(names(df) == "BMI.CategoryNormal Weight")] <- "BMI.CategoryNormal.Weight"
+colnames(df)[which(names(df) == "OccupationSoftware Engineer")] <- "OccupationSoftware.Engineer"
+colnames(df)[which(names(df) == "Sleep.DisorderSleep Apnea")] <- "Sleep.DisorderSleep.Apnea"
 
-# Split data into train and test sets
-train_index <- createDataPartition(df$Sleep.Duration, p = 0.7, list = FALSE)
-train_data <- df[train_index, ]
-test_data <- df[-train_index, ]
+#############################
+# Tolgo colonne pressione con pochi sample
+df <- subset(df, select = -c(`Blood.Pressure11776`, `Blood.Pressure11875`, `Blood.Pressure11876`, `Blood.Pressure11977`, `Blood.Pressure12179`, `Blood.Pressure12280`, `Blood.Pressure12582`, `Blood.Pressure12683`, `Blood.Pressure12884`, `Blood.Pressure12885`, `Blood.Pressure12984`, `Blood.Pressure13086`, `Blood.Pressure13186`, `Blood.Pressure13287`, `Blood.Pressure13588`, `Blood.Pressure13991`,  `Blood.Pressure14090`, `Blood.Pressure14292`))
+df <- subset(df, select = -c(`OccupationManager`, `OccupationSales.Representative`, `OccupationScientist`, `OccupationSoftware.Engineer`))
+#############################
 
+df <- df %>% mutate_all(~(scale(.) %>% as.vector))
+train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
+
+df <- df[train_lines, ]
 # Ridge regression
 # Define control parameters for Ridge regression
 ctrl <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
 
 # Train Ridge regression model with different lambda values
-response_variable <- train_data$Sleep.Duration
-ridge_model <- train(x = train_data[, -which(names(train_data) == "Sleep.Duration")], 
+response_variable <- df$Sleep.Duration
+ridge_model <- train(x = df[, -which(names(df) == "Sleep.Duration")], 
                      y = response_variable, 
                      method = "glmnet", 
                      trControl = ctrl, 
@@ -98,7 +104,7 @@ print("Shapiro-Wilk test per la normalità dei residui:")
 print(shapiro_test)
 
 # Disegna l'istogramma dei residui
-hist(residui, main = "Istogramma dei Residui", xlab = "Residui")
+hist(residui, main = "Residual distribution", xlab = "Residuals analysis")
 
 # Stampa un messaggio se i residui non sono normalmente distribuiti
 if (shapiro_test$p.value < 0.05) {
@@ -106,3 +112,22 @@ if (shapiro_test$p.value < 0.05) {
 } else {
   cat("I residui seguono una distribuzione normale (p-value >= 0.05).\n")
 }
+
+# Aggiungi il QQ plot dei residui
+qqnorm(residui)
+qqline(residui)
+
+ks_test <- ks.test(residui, "pnorm", mean = mean(residui), sd = sd(residui))
+print("Kolmogorov-Smirnov test for normality of residuals:")
+print(ks_test)
+
+# Addestramento del modello Ridge utilizzando glmnet
+ridge_model <- cv.glmnet(x = as.matrix(df[, -which(names(df) == "Sleep.Duration")]), 
+                         y = response_variable, 
+                         alpha = 0,  # Ridge Regression (alpha = 0)
+                         nfolds = 10, 
+                         standardize = TRUE)  # Pre-processa i dati
+print(ridge_model)
+
+# Stampare il grafico dei valori di lambda
+plot(ridge_model)

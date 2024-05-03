@@ -1,27 +1,17 @@
-library(caret)
-library(glmnet)
-library(dplyr)
+library(gam)
+library(akima)
+library(MASS)
+#install.packages('boot')
+library(boot)
+set.seed(22);
 
-set.seed(22)
-
+##### DATASET SETUP ######
 setwd("~/Github/Statistical-learning-project/Dataset")
 
-df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted.csv")
+df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-# Types of the columns of the dataset:
-# Gender: character
-# Age:integer
-# Occupation: character
-# Sleep.Duration: numeric
-# Physical.Activity.Level:integer
-# Stress.Level: integer
-# BMI.Category: character
-# Blood.Pressure: character 
-# Heart.Rate: integer
-# Daily.Steps: integer
-# Sleep.Disorder: character
+df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
 
-# Transformation to dummy variables
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
 df_dummies <- predict(dummy_transform, newdata = df)
@@ -30,15 +20,20 @@ df <- cbind(df, df_dummies)
 
 df <- df[, !(names(df) %in% c("Gender", "Occupation", "BMI.Category", "Blood.Pressure", "Sleep.Disorder"))]
 
-## Removing one element for each dummy
-# They were removed:
-# GenderMale
-# OccupationDoctor
-# Blood.Pressure115/78
-# BMI.CategoryObese
-# Sleep.DisorderInsomnia
+df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure11578`, BMI.CategoryObese, Sleep.DisorderInsomnia))
 
-df <- subset(df, select = -c(GenderMale, OccupationDoctor, `Blood.Pressure115/78`, BMI.CategoryObese, Sleep.DisorderInsomnia))
+df <- df %>% mutate_all(~(scale(.) %>% as.vector)) # standardizzo
+
+colnames(df)[which(names(df) == "OccupationSales Representative")] <- "OccupationSales.Representative"
+colnames(df)[which(names(df) == "BMI.CategoryNormal Weight")] <- "BMI.CategoryNormal.Weight"
+colnames(df)[which(names(df) == "OccupationSoftware Engineer")] <- "OccupationSoftware.Engineer"
+colnames(df)[which(names(df) == "Sleep.DisorderSleep Apnea")] <- "Sleep.DisorderSleep.Apnea"
+
+#############################
+# Tolgo colonne pressione con pochi sample
+df <- subset(df, select = -c(`Blood.Pressure11776`, `Blood.Pressure11875`, `Blood.Pressure11876`, `Blood.Pressure11977`, `Blood.Pressure12179`, `Blood.Pressure12280`, `Blood.Pressure12582`, `Blood.Pressure12683`, `Blood.Pressure12884`, `Blood.Pressure12885`, `Blood.Pressure12984`, `Blood.Pressure13086`, `Blood.Pressure13186`, `Blood.Pressure13287`, `Blood.Pressure13588`, `Blood.Pressure13991`,  `Blood.Pressure14090`, `Blood.Pressure14292`))
+df <- subset(df, select = -c(`OccupationManager`, `OccupationSales.Representative`, `OccupationScientist`, `OccupationSoftware.Engineer`))
+#############################
 
 df <- df %>% mutate_all(~(scale(.) %>% as.vector))
 train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
@@ -107,7 +102,7 @@ print("Shapiro-Wilk test per la normalità dei residui:")
 print(shapiro_test)
 
 # Disegna l'istogramma dei residui
-hist(residui, main = "Istogramma dei Residui", xlab = "Residui")
+hist(residui, main = "Residual distribution", xlab = "Residual")
 
 # Stampa un messaggio se i residui non sono normalmente distribuiti
 if (shapiro_test$p.value < 0.05) {
@@ -115,3 +110,70 @@ if (shapiro_test$p.value < 0.05) {
 } else {
   cat("I residui seguono una distribuzione normale (p-value >= 0.05).\n")
 }
+
+# Aggiungi il QQ plot dei residui
+qqnorm(residui)
+qqline(residui)
+
+# Calcolo R^2
+r_squared <- 1 - mse/var(actual_values)
+print(paste("R-squared:", r_squared))
+
+# Calcolo della devianza spiegata
+deviance_explained <- 1 - (sum((actual_values - mean(actual_values))^2) / sum((actual_values - predictions)^2))
+print(paste("Deviance explained:", deviance_explained))
+
+# Calcolo della devianza residua
+residual_deviance <- sum((actual_values - predictions)^2)
+print(paste("Residual deviance:", residual_deviance))
+
+# Calcolo della devianza totale
+total_deviance <- sum((actual_values - mean(actual_values))^2)
+print(paste("Total deviance:", total_deviance))
+
+# Calcolo del MSE sul train set
+train_predictions <- predict(lasso_model, newdata = df[train_lines, ])
+train_actual_values <- response_variable[train_lines]
+mse_train <- mean((train_predictions - train_actual_values)^2)
+print(paste("Mean Squared Error (MSE) sul train set:", mse_train))
+
+# Calcolo dei residui sul train set
+train_residui <- train_actual_values - train_predictions
+
+# Calcolo della media dei residui sul train set
+residual_mean_train <- mean(train_residui)
+print(paste("Residuals mean on train set:", residual_mean_train))
+
+# Calcolo della varianza dei residui sul train set
+residual_variance_train <- var(train_residui)
+print(paste("Residuals variance on train set:", residual_variance_train))
+
+# Calcolo del MSE sul test set (già calcolato come mse)
+print(paste("Mean Squared Error (MSE) sul test set:", mse))
+
+# Calcolo della media dei residui sul test set
+residual_mean_test <- mean(residui)
+print(paste("Residuals mean on test set:", residual_mean_test))
+
+# Calcolo della varianza dei residui sul test set
+residual_variance_test <- var(residui)
+print(paste("Residuals variance on test set:", residual_variance_test))
+
+ks_test <- ks.test(residui, "pnorm", mean = mean(residui), sd = sd(residui))
+print("Kolmogorov-Smirnov test for normality of residuals:")
+print(ks_test)
+
+plot(lasso_model)
+
+lambda_values <- lasso_model$resample$lambda
+mse_values <- lasso_model$resample$RMSE^2
+
+library(glmnet)
+
+# Addestramento del modello Lasso utilizzando glmnet
+lasso_model <- cv.glmnet(x = as.matrix(df[, -which(names(df) == "Sleep.Duration")]), 
+                         y = response_variable, 
+                         alpha = 1,  # Lasso Regression (alpha = 1)
+                         nfolds = 10, 
+                         standardize = TRUE)  # Pre-processa i dati
+plot(lasso_model)
