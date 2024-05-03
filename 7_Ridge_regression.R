@@ -131,3 +131,4 @@ print(ridge_model)
 
 # Stampare il grafico dei valori di lambda
 plot(ridge_model)
+print(ridge_model$lambda.min)

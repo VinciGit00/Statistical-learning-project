@@ -58,7 +58,7 @@ tree_model <- tree( Sleep.Duration ~ . ,data= train_df, split = "gini")
 # show result 
 summary(tree_model)
 plot(tree_model)
-text(tree_model, pretty = 0, cex = 0.5, pos = 2, offset = 0.5, adj = c(0.5, 0.5))
+text(tree_model, pretty = 0, cex = 0.5, pos = 2, offset = 0.5, adj = c(0.5, 0.5), digits = 4)
 
 pred_value <- predict(tree_model, newdata = test_df)
 table(pred_value, test_df$Sleep.Duration)

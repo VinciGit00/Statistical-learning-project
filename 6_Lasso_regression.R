@@ -177,3 +177,4 @@ lasso_model <- cv.glmnet(x = as.matrix(df[, -which(names(df) == "Sleep.Duration"
                          nfolds = 10, 
                          standardize = TRUE)  # Pre-processa i dati
 plot(lasso_model)
+print(lasso_model$lambda.min)
