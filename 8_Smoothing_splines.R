@@ -49,3 +49,7 @@ print(models[[best_param]])
 
 # Stampare il grafico CP del modello migliore
 plot(cp_plots[[best_param]], main = paste("CP Plot for", best_param))
+
+# Calcolo del R² per il modello migliore
+best_model <- models[[best_param]]
+summary(best_model)$r.squared

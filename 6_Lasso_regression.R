@@ -3,14 +3,15 @@ library(akima)
 library(MASS)
 #install.packages('boot')
 library(boot)
-set.seed(22);
+library(glmnet)
+set.seed(22)
 
 ##### DATASET SETUP ######
 setwd("~/Github/Statistical-learning-project/Dataset")
 
 df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+df$Blood.Pressure <- as.character(df$Blood.Pressure) # rendo i valori stringhe
 
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
@@ -44,7 +45,6 @@ df <- df[train_lines, ]
 # Define control parameters for Lasso regression
 ctrl <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
 
-# Lasso regression
 # Train Lasso regression model with different lambda values
 response_variable <- df$Sleep.Duration
 lasso_model <- train(x = df[, -which(names(df) == "Sleep.Duration")], y = response_variable, method = "glmnet", trControl = ctrl, tuneLength = 10, preProcess = c("center", "scale"))
@@ -167,8 +167,6 @@ plot(lasso_model)
 
 lambda_values <- lasso_model$resample$lambda
 mse_values <- lasso_model$resample$RMSE^2
-
-library(glmnet)
 
 # Addestramento del modello Lasso utilizzando glmnet
 lasso_model <- cv.glmnet(x = as.matrix(df[, -which(names(df) == "Sleep.Duration")]), 

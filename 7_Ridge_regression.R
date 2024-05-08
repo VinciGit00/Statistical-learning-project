@@ -4,13 +4,12 @@ library(dplyr)
 
 set.seed(22)
 
-
 ##### DATASET SETUP ######
 setwd("~/Github/Statistical-learning-project/Dataset")
 
 df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+df$Blood.Pressure <- as.character(df$Blood.Pressure) # rendo i valori stringhe
 
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
@@ -36,9 +35,10 @@ df <- subset(df, select = -c(`OccupationManager`, `OccupationSales.Representativ
 #############################
 
 df <- df %>% mutate_all(~(scale(.) %>% as.vector))
-train_lines <- sample(dim(df)[1], round(dim(df)[1]*0.7))
+train_lines <- sample(dim(df)[1], round(dim(df)[1] * 0.7))
 
 df <- df[train_lines, ]
+
 # Ridge regression
 # Define control parameters for Ridge regression
 ctrl <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
@@ -56,47 +56,49 @@ ridge_model <- train(x = df[, -which(names(df) == "Sleep.Duration")],
 # Display the best lambda value selected by caret
 print(ridge_model$bestTune)
 
-# Calculate MSE of the best model
+# Calcolo del MSE del modello migliore
+test_data <- df[-train_lines, ]  # Utilizziamo i dati non usati per il training come dati di test
 predictions <- predict(ridge_model, newdata = test_data)
-mse <- mean((predictions - test_data$Sleep.Duration)^2)
-print(paste("Mean Squared Error (MSE) of the best model:", mse))
+actual_values <- test_data$Sleep.Duration
+mse <- mean((predictions - actual_values)^2)
+print(paste("Mean Squared Error (MSE) del modello migliore:", mse))
 
-# Get coefficients of the model
+# Ottieni i coefficienti del modello
 coefficients <- coef(ridge_model$finalModel, s = ridge_model$bestTune$lambda)
 
-# Print coefficients of the variables
+# Stampa i coefficienti delle variabili
 significant_coeffs <- coefficients[c(coefficients[, 1] != 0), ]
 print(significant_coeffs)
 
-# Number of total variables in the dataset
-num_variables_total <- ncol(df) - 1  # Exclude the response variable
+# Numero totale di variabili nel dataset
+num_variables_total <- ncol(df) - 1  # Escludiamo la variabile di risposta
 
-# Number of significant variables in the model
+# Numero di variabili significative nel modello
 num_variables_significant <- length(significant_coeffs)
 
 if (num_variables_significant < num_variables_total) {
-  cat("The model removed", num_variables_total - num_variables_significant, "variables.\n")
+  cat("Sono state rimosse", num_variables_total - num_variables_significant, "variabili dal modello.\n")
 } else if (num_variables_significant == num_variables_total) {
-  cat("No variables were removed from the model.\n")
+  cat("Non è stata rimossa nessuna variabile dal modello.\n")
 } else {
-  cat("Not enough information to determine if variables were removed.\n")
+  cat("Non ci sono abbastanza informazioni per determinare se sono state rimosse variabili.\n")
 }
 
-# List of original variables
+# Elenco delle variabili originali
 original_variables <- c("GenderMale", "OccupationDoctor", "Blood.Pressure115/78", "BMI.CategoryObese", "Sleep.DisorderInsomnia")
 
-# Find removed variables
+# Trova le variabili rimosse
 variables_removed <- setdiff(original_variables, rownames(significant_coeffs))
 
 if (length(variables_removed) > 0) {
-  cat("The following variables were removed from the model:\n")
+  cat("Le seguenti variabili sono state rimosse dal modello:\n")
   print(variables_removed)
 } else {
-  cat("No variables were removed from the model.\n")
+  cat("Non sono state rimosse variabili dal modello.\n")
 }
 
 # Calcolo dei residui del modello
-residui <- test_data$Sleep.Duration - predictions
+residui <- actual_values - predictions
 
 # Test di normalità dei residui
 shapiro_test <- shapiro.test(residui)
@@ -129,6 +131,10 @@ ridge_model <- cv.glmnet(x = as.matrix(df[, -which(names(df) == "Sleep.Duration"
                          standardize = TRUE)  # Pre-processa i dati
 print(ridge_model)
 
-# Stampare il grafico dei valori di lambda
+# Print lambda values plot
 plot(ridge_model)
 print(ridge_model$lambda.min)
+
+# Calcolo dell'R^2 test library(caret)
+r_squared_test <- cor(predictions, actual_values)^2
+print(paste("R-squared test library(caret):", r_squared_test))

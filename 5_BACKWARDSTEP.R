@@ -82,4 +82,6 @@ plot(lm_fit$residuals, pch = "o", col = "blue" ,
 abline(c(0,0),c(0,length(lm_fit$residuals)), col= "red", lwd = 2)
 ks.test(lm_fit$residuals, 'pnorm') # test normalità kolgomorov-smirnov (se pvalue > 0.05 allora dati sono normali)
 
-
+## R² TEST ##
+rsquared <- summary(lm_fit)$r.squared
+cat("R-squared: ", rsquared, "\n")

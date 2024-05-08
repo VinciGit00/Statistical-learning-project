@@ -7,7 +7,6 @@ library(foreach)
 library(gam)
 library(akima)
 library(MASS)
-#install.packages('boot')
 library(boot)
 set.seed(22);
 
@@ -82,65 +81,18 @@ plot(1:5,mses,type = "b",col = "blue",
      main = "Test error estimation"
 )
 
+## lr2 TEST ##
 
+# lr2 Test Flexibility 2:
+lr2_test_2 <- cor(df$Sleep.Duration, predict(model, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 3:
+lr2_test_3 <- cor(df$Sleep.Duration, predict(model, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 4:
+lr2_test_4 <- cor(df$Sleep.Duration, predict(model, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 5:
+lr2_test_5 <- cor(df$Sleep.Duration, predict(model, newdata = df), method = "pearson")^2
 
-
-
-
-
-## KFOLD ##
-mses <- list()
-ctrl <- trainControl(method = "cv", number=10)
-model <- train(Sleep.Duration ~ Age+Physical.Activity.Level+Stress.Level+Heart.Rate+Daily.Steps+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationNurse+OccupationSalesperson+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure12080+Blood.Pressure12580+Blood.Pressure13085+Blood.Pressure13590+Blood.Pressure14095+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data = df, method = "lm", trControl = ctrl)
-print(model)
-mses$p1 <- model$results$RMSE^2
-
-model <- train(Sleep.Duration ~ poly(Age, 2)+poly(Physical.Activity.Level, 2)+poly(Stress.Level, 2)+poly(Heart.Rate, 2)+poly(Daily.Steps, 2)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationNurse+OccupationSalesperson+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure12080+Blood.Pressure12580+Blood.Pressure13085+Blood.Pressure13590+Blood.Pressure14095+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data = df, method = "lm", trControl = ctrl)
-print(model)
-mses$p2 <- model$results$RMSE^2
-
-
-model <- train(Sleep.Duration ~ poly(Age, 3)+poly(Physical.Activity.Level, 3)+poly(Stress.Level, 3)+poly(Heart.Rate, 3)+poly(Daily.Steps, 3)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationNurse+OccupationSalesperson+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure12080+Blood.Pressure12580+Blood.Pressure13085+Blood.Pressure13590+Blood.Pressure14095+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data = df, method = "lm", trControl = ctrl)
-print(model)
-mses$p3 <- model$results$RMSE^2
-
-
-model <- train(Sleep.Duration ~ poly(Age, 4)+poly(Physical.Activity.Level, 4)+poly(Stress.Level, 4)+poly(Heart.Rate, 4)+poly(Daily.Steps, 4)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationNurse+OccupationSalesperson+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure12080+Blood.Pressure12580+Blood.Pressure13085+Blood.Pressure13590+Blood.Pressure14095+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data = df, method = "lm", trControl = ctrl)
-print(model)
-mses$p4 <- model$results$RMSE^2
-
-
-model <- train(Sleep.Duration ~ poly(Age, 5)+poly(Physical.Activity.Level, 5)+poly(Stress.Level, 5)+poly(Heart.Rate, 5)+poly(Daily.Steps, 5)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationNurse+OccupationSalesperson+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure12080+Blood.Pressure12580+Blood.Pressure13085+Blood.Pressure13590+Blood.Pressure14095+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data = df, method = "lm", trControl = ctrl)
-print(model)
-mses$p5 <- model$results$RMSE^2
-
-plot(1:5,mses,type = "b",col = "blue",
-     ylab = "MSE",
-     xlab = "Flexibility (poly degree)",
-     main = "Test error estimation"
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-kfold <- rep (0 , a)
-for(i in 1:a) {
-  glm_fit <- glm(Sleep.Duration ~ poly(Age, i)+poly(Physical.Activity.Level, i)+poly(Stress.Level, i)+poly(Heart.Rate, i)+poly(Daily.Steps, i)+GenderFemale+OccupationAccountant+OccupationEngineer+OccupationLawyer+OccupationManager+OccupationNurse+OccupationSales.Representative+OccupationSalesperson+OccupationScientist+OccupationSoftware.Engineer+OccupationTeacher+BMI.CategoryNormal+BMI.CategoryNormal.Weight+BMI.CategoryOverweight+Blood.Pressure11575+Blood.Pressure11776+Blood.Pressure11875+Blood.Pressure11876+Blood.Pressure11977+Blood.Pressure12080+Blood.Pressure12179+Blood.Pressure12280+Blood.Pressure12580+Blood.Pressure12582+Blood.Pressure12683+Blood.Pressure12884+Blood.Pressure12885+Blood.Pressure12984+Blood.Pressure13085+Blood.Pressure13086+Blood.Pressure13186+Blood.Pressure13287+Blood.Pressure13588+Blood.Pressure13590+Blood.Pressure13991+Blood.Pressure14090+Blood.Pressure14095+Blood.Pressure14292+Sleep.DisorderNone+Sleep.DisorderSleep.Apnea, data=df )
-  kfold[ i ] <- cv.glm( df , glm_fit , K = 10)$delta[1]
-}
-
-lines(1:a,kfold,type = "b",col = "red", lty = 10)
-legend("topright",legend=c("kfold","k = 10"),col = c("blue","red"),lty = 1:2)
-MSE_kfold <- mean(loo_cv)
-MSE_loocv <- mean(kfold)
+cat("lr2 Test Flexibility 2: ", lr2_test_2, "\n")
+cat("lr2 Test Flexibility 3: ", lr2_test_3, "\n")
+cat("lr2 Test Flexibility 4: ", lr2_test_4, "\n")
+cat("lr2 Test Flexibility 5: ", lr2_test_5, "\n")

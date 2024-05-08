@@ -8,14 +8,13 @@ library(gam)
 library(akima)
 library(MASS)
 #library(mgcv)
-set.seed(22);
-
+set.seed(22)
 
 ##### DATASET SETUP ######
 # ATTENZIONE! IL DATASET DEVE AVERE LE ENTRY DELLA COLONNA BLOOD PRESSURE SENZA LE "/"
 df <- read.csv("./Dataset/Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+df$Blood.Pressure <- as.character(df$Blood.Pressure) # rendo i valori stringhe
 
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
@@ -84,13 +83,3 @@ abline(c(0,0),c(0,length(model_gam$residuals)), col= "red", lwd = 2)
 # test di normalità (if pvalue > 0.05 residuals have normal distribution)
 shapiro.test(model_gam$residuals)
 ks.test(model_gam$residuals, 'pnorm')
-
-
-
-
-
-
-
-
-
-

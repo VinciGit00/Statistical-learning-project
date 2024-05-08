@@ -11,7 +11,7 @@ setwd("~/Github/Statistical-learning-project/Dataset")
 
 df <- read.csv("Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+df$Blood.Pressure <- as.character(df$Blood.Pressure) # rendo i valori stringhe
 
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
@@ -115,3 +115,7 @@ hist(res, main = "Histogram of Residuals", xlab = "Residuals")
 
 qqnorm(res)
 qqline(res)
+
+# Calcolo dell'R^2 test library(caret)
+r_squared_test <- cor(pred_value, test_df$Sleep.Duration)^2
+print(paste("R-squared test library(caret):", r_squared_test))

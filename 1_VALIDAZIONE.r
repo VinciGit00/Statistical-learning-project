@@ -121,4 +121,13 @@ plot(1:5,c(MSE_TEST,test_2,test_3,test_4,test_5), type = "b", col="blue",
      xlab = "Flexibility",
      main = "Validation Test MSE")
 
+# Aggiungo test lr2
+lr2_test_2 <- cor(df$Sleep.Duration[-train], predict(lm_fit_2, newdata = df[-train,]), method = "pearson")^2
+lr2_test_3 <- cor(df$Sleep.Duration[-train], predict(lm_fit_3, newdata = df[-train,]), method = "pearson")^2
+lr2_test_4 <- cor(df$Sleep.Duration[-train], predict(lm_fit_4, newdata = df[-train,]), method = "pearson")^2
+lr2_test_5 <- cor(df$Sleep.Duration[-train], predict(lm_fit_5, newdata = df[-train,]), method = "pearson")^2
 
+cat("lr2 Test Flexibility 2: ", lr2_test_2, "\n")
+cat("lr2 Test Flexibility 3: ", lr2_test_3, "\n")
+cat("lr2 Test Flexibility 4: ", lr2_test_4, "\n")
+cat("lr2 Test Flexibility 5: ", lr2_test_5, "\n")

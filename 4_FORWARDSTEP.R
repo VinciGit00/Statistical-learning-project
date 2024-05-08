@@ -8,13 +8,14 @@ library(gam)
 #install.packages('gplots')
 library(gplots)
 library(akima)
+library(boot)
 library(MASS)
 set.seed(22);
 
 ##### DATASET SETUP ######
 df <- read.csv("./Dataset/Sleep_health_and_lifestyle_dataset_adjusted_gam.csv")
 
-df$Blood.Pressure<-as.character(df$Blood.Pressure) # rendo i valori stringhe
+df$Blood.Pressure <- as.character(df$Blood.Pressure) # rendo i valori stringhe
 
 dummy_transform <- dummyVars(~ Gender + Occupation + BMI.Category + Blood.Pressure + Sleep.Disorder, data = df)
 
@@ -84,4 +85,17 @@ plot(lm_fit$residuals, pch = "o", col = "blue" ,
 abline(c(0,0),c(0,length(lm_fit$residuals)), col= "red", lwd = 2)
 ks.test(lm_fit$residuals, 'pnorm') # test normalità kolgomorov-smirnov (se pvalue > 0.05 allora dati sono normali)
 
+## lr2 TEST ##
+# lr2 Test Flexibility 2:
+lr2_test_2 <- cor(df$Sleep.Duration, predict(lm_fit, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 3:
+lr2_test_3 <- cor(df$Sleep.Duration, predict(lm_fit, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 4:
+lr2_test_4 <- cor(df$Sleep.Duration, predict(lm_fit, newdata = df), method = "pearson")^2
+# lr2 Test Flexibility 5:
+lr2_test_5 <- cor(df$Sleep.Duration, predict(lm_fit, newdata = df), method = "pearson")^2
 
+cat("lr2 Test Flexibility 2: ", lr2_test_2, "\n")
+cat("lr2 Test Flexibility 3: ", lr2_test_3, "\n")
+cat("lr2 Test Flexibility 4: ", lr2_test_4, "\n")
+cat("lr2 Test Flexibility 5: ", lr2_test_5, "\n")
