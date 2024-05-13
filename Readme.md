@@ -18,5 +18,5 @@ All the algorithms are implemented in R programming language
 - [x] 9 - GAM with local regression
 - [x] 10 - Regression tree 
 - [x] 11 - Random forest
-- [ ] 12 - Boosting (optional)
+- [ ] 12 - Boosting 
 - [ ] 13 - Bagging (optional)
