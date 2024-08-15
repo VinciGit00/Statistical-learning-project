@@ -85,3 +85,13 @@ ks.test(lm_fit$residuals, 'pnorm') # test normalità kolgomorov-smirnov (se pval
 ## R² TEST ##
 rsquared <- summary(lm_fit)$r.squared
 cat("R-squared: ", rsquared, "\n")
+
+##### R² TEST ON TEST DATA #####
+# Predicting Sleep Duration on the test set
+pred_value <- predict(lm_fit, newdata = df[-train,])
+
+# Calculating R-squared on the test set
+SSE <- sum((df$Sleep.Duration[-train] - pred_value)^2)
+SST <- sum((df$Sleep.Duration[-train] - mean(df$Sleep.Duration[-train]))^2)
+test_R2 <- 1 - SSE/SST
+cat("Test R-squared: ", test_R2, "\n")

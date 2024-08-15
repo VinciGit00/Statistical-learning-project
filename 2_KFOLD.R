@@ -65,6 +65,24 @@ plot(1:10,kfold,type = "b",col = "red", lty = 2)
 legend("topright",legend=c("LOOCV","k = 10"),col = c("blue","red"),lty = 1:2)
 MSE <- mean(kfold)
 
+##### TEST LR2 MODEL #####
+# Splitting the dataset into training (80%) and test (20%) sets
+set.seed(22)
+train_indices <- createDataPartition(df$Sleep.Duration, p = 0.8, list = FALSE)
+train_data <- df[train_indices, ]
+test_data <- df[-train_indices, ]
+
+# Fit the linear regression model on the training data
+lr2 <- glm(Sleep.Duration ~ ., data = train_data)
+
+# Predicting Sleep Duration on the test set
+predictions <- predict(lr2, newdata = test_data)
+
+# Calculating R-squared on the test set
+SSE <- sum((test_data$Sleep.Duration - predictions)^2)
+SST <- sum((test_data$Sleep.Duration - mean(test_data$Sleep.Duration))^2)
+test_R2 <- 1 - SSE/SST
+print(paste("Test R-squared: ", test_R2))
 
 
 

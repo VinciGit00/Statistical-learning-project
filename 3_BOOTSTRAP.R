@@ -106,3 +106,19 @@ cat("lr2 Test Flexibility 2: ", lr2_test_2, "\n")
 cat("lr2 Test Flexibility 3: ", lr2_test_3, "\n")
 cat("lr2 Test Flexibility 4: ", lr2_test_4, "\n")
 cat("lr2 Test Flexibility 5: ", lr2_test_5, "\n")
+
+##### TEST LR2 MODEL #####
+# Splitting the dataset into training (70%) and test (30%) sets
+train <- sample(dim(df)[1], round(dim(df)[1] * 0.7))
+
+# Fit the linear regression model on the training data
+lr2 <- lm(Sleep.Duration ~ ., data = df[train, ])
+
+# Predicting Sleep Duration on the test set
+predictions <- predict(lr2, newdata = df[-train, ])
+
+# Calculating R-squared on the test set
+SSE <- sum((df$Sleep.Duration[-train] - predictions)^2)
+SST <- sum((df$Sleep.Duration[-train] - mean(df$Sleep.Duration[-train]))^2)
+test_R2 <- 1 - SSE/SST
+print(paste("Test R-squared: ", test_R2))

@@ -67,3 +67,17 @@ ks.test(model_gam$residuals, 'pnorm') # test normalità Kolmogorov-Smirnov (se p
 # Calcolo del R²
 r_squared <- summary(model_gam)$r.squared
 r_squared
+
+# Predici i valori sul set di test
+predictions_test <- predict(model_gam, newdata = df[-train,])
+
+# Ottieni i valori reali del set di test
+actual_values_test <- df$Sleep.Duration[-train]
+
+# Calcola l'R² sui dati di test
+rss <- sum((predictions_test - actual_values_test)^2)  # Residual Sum of Squares
+tss <- sum((actual_values_test - mean(actual_values_test))^2)  # Total Sum of Squares
+r_squared_test <- 1 - (rss / tss)
+
+# Stampa l'R² sui dati di test
+r_squared_test

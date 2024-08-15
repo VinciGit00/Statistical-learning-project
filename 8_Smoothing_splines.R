@@ -19,13 +19,10 @@ parameters <- c("Age", "Physical.Activity.Level", "Stress.Level", "Heart.Rate", 
 # Numero di gradi di libertà desiderato per il termine di smoothing
 df_value <- 5
 
-# Impostazione del parametro di smoothing
-lambda <- 0.1
-
 # Iterazione sui parametri
 for (param in parameters) {
   # Creazione del termine di smoothing per il parametro corrente utilizzando smooth.spline()
-  spline_fit <- with(df, smooth.spline(df[[param]], Sleep.Duration, df = df))
+  spline_fit <- with(df, smooth.spline(df[[param]], Sleep.Duration, df = df_value))
   
   # Definizione del modello lineare utilizzando il termine di smoothing
   model_formula <- as.formula(paste("Sleep.Duration ~ bs(", param, ", df=", df_value, ")", sep = ""))
@@ -38,7 +35,7 @@ for (param in parameters) {
   deviances <- c(deviances, deviance(current_model))
   
   # Calcolo del grafico CP
-  cp_plots[[param]] <- spline_fit$y - predict(current_model)
+  cp_plots[[param]] <- residuals(current_model) + spline_fit$y
 }
 
 # Trovare il parametro con la devianza minima
@@ -52,4 +49,5 @@ plot(cp_plots[[best_param]], main = paste("CP Plot for", best_param))
 
 # Calcolo del R² per il modello migliore
 best_model <- models[[best_param]]
-summary(best_model)$r.squared
+r_squared <- summary(best_model)$r.squared
+print(paste("R-squared for the best model:", r_squared))
